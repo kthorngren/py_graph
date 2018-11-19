@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <title id="page-title">Title</title>
+
+	{css_includes}
+
+	<link href="static/css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css" />
+
+    <script>var page_name = "{page_name}"</script>
+  	<style>
+
+  	{css_styles}
+
+
+  	</style>
+
+  </head>
+
+
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="index" class="site_title"><i class="fa fa-home"></i> <span id="nav-title"> Grapher</span></a>
+            </div>
+            <div class="clearfix"></div>
+
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+              <ul class="nav side-menu">
+                <li><a href="database"><i class="fa fa-database"></i> Database Maintenance</a></li>
+                <li><a href="graph_upload"><i class="fa fa-upload"></i> File Upload</a></li>
+                <li><a href="textfsm"><i class="fa fa-file-text"></i> TextFSM Scripts</a></li>
+                <li><a href="graph"><i class="fa fa-area-chart"></i> Graph</a></li>
+              </ul>
+             </div>
+             <!-- /menu_selection -->
+
+           </div>
+           <!-- /sidebar menu -->
+          </div>
+        </div>
+
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav class="" role="navigation">
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+            </nav>
+          </div>
+        </div>
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              <div class="title_left">
+                <h3 id='main-title'>Main Title</h3>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+
+				{html_tables}
+
+              </div>
+            </div>
+            <!-- /row -->
+          </div>
+
+
+
+			<!-- Overview Panel -->
+            <div class="x_panel">
+                  <div class="x_title">
+                    <h2 id="ucce">Graph Builder<small id="ucce-small"></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                      </li>
+                      <li><a class="close-link"><i class="fa fa-close"></i></a>
+                      </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+			<div class="x_content">
+
+
+			  <!-- row -->
+
+			  <div class="row">
+			  <div class="col-md-12 col-sm-12 col-xs-12">
+
+				<p class="text-muted font-13 m-b-30">Place graph_builder instructions here</p>
+
+			  </div>
+			  </div>
+
+		  </div>
+
+			  <!-- row -->
+
+			  <div class="row">
+			  <div class="col-md-12 col-sm-12 col-xs-12">
+
+
+			  <div class="btn-group">
+			  	<button id="get-pandas" class="btn btn-default" ><span>Generate Pandas Dataframe</span></button>
+			  	<button id="gen-graph" class="btn btn-default" ><span>Generate Graph(s)</span></button>
+			  	<button id="auto-graph" class="btn btn-default" ><span>Auto-generate Graph(s)</span></button>
+			  	<button id="save-options" class="btn btn-default" ><span>Save Graph Options</span></button>
+			  </div>
+			  </div>
+			  </div>
+
+			</div>
+			<!-- /overview panel -->
+
+
+                    <!-- Graph Options panel -->
+					<div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2 id="table-title">Graph Options</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                      </li>
+                      <li><a class="close-link"><i class="fa fa-close"></i></a>
+                      </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                  </div>
+                  <!-- /x_title -->
+                  <div class="x_content">
+					  <div class="col-md-3" style="text-align:left">
+					  	<h5>Define Columns to Graph:</h5>
+					  	<label>Index Column: </label>
+ 					    <div id="index_col"></div>
+
+					  	<label>Device Column: </label>
+ 					    <div id="selected_col"></div>
+
+					  	<label>Data Column: </label>
+ 					    <div id="plot_col"></div>
+
+					  	<h5>Select All Devices:</h5>
+ 					    <div class="checkbox">
+					      <label><input type="checkbox" class="select-all-devices" id="select-all" value="select-all" />Select All Devices</label>
+					    </div>
+ 					    <div class="checkbox">
+					      <label><input type="checkbox" class="select-all-devices" id="deselect-all" value="deselect-all" />Deselect All Devices</label>
+					    </div>
+    				  </div>
+					  <div class="col-md-3" style="text-align:left">
+					    <h5>Graph Options:</h5>
+ 					    <div class="checkbox">
+					      <label><input type="checkbox" class="graph-cb" id="legend" />Legend</label>
+					    </div>
+ 					    <div class="checkbox">
+					      <label id="group_by_label"><input type="checkbox" class="graph-cb" id="group_by" value="none" /><span>Group by</span></label>
+					    </div>
+
+ 					    <div >
+					      <label>Graph Title:<br><input class="input-opts" id="title"/></label>
+					    </div>
+
+ 					    <div >
+					      <label>Interval (Seconds):<br><input class="input-opts" id="interval"/></label>
+					    </div>
+ 					    <div >
+					      <label>Aggregation Type:<br><input class="input-opts" id="aggregation"/></label>
+					    </div>
+
+
+   				  </div>
+ 					  <div class="col-md-3" style="text-align:left">
+ 					  	<h5>Y Axis Options:</h5>
+ 					    <div >
+					      <label>Y Axis Label:<br><input class="input-opts" id="y_label"/></label>
+					    </div>
+ 					    <div >
+					      <label>Y Axis Number Format:<br><input class="input-opts" id="y_label_format"/></label>
+					    </div>
+ 					    <div >
+					      <label>Y Limit:<br><input class="input-opts" id="y_limit"/></label>
+					    </div>
+ 					  	<h5>X Axis Options:</h5>
+ 					    <div >
+					      <label>X Axis Label:<br><input class="input-opts" id="x_label"/></label>
+					    </div>
+
+
+					  </div>
+					  <div class="col-md-3" style="text-align:left">
+					  	<h5>Define Graph Date Time Range:</h5>
+ 					    <div class="checkbox">
+					      <label><input type="checkbox" class="save-range" id="save_datetime" value="save_datetime" />Save Datetime Range</label>
+					    </div>
+
+					  	  <h5 >Graph Start Time:</h5>
+
+							<div id="start_time" class="input-append date form_datetime datetimepicker">
+    							<input class="picker-input" size="16" type="text" value="" readonly>
+    							<span class="add-on"><i class="icon-th"></i></span>
+							</div>
+
+					  	  <h5 >Graph End Time:</h5>
+
+							<div id="end_time" class="input-append date form_datetime datetimepicker">
+    							<input class="picker-input" size="16" type="text" value="" readonly>
+    							<span class="add-on"><i class="icon-th"></i></span>
+							</div>
+
+
+					  	<h5>Graph File Path:</h5>
+ 					    <div >
+					      <label>File save path:<br><input class="file-opts" placeholder="Path" id="file-path"/></label>
+					    </div>
+ 					    <div >
+					      <label>Filename template:<br><input class="file-opts" placeholder="File template" id="file-template"/></label>
+					    </div>
+					  </div>
+    				</div>
+				</div>
+				</div>
+				</div>
+
+
+
+
+
+              <div class="row">
+              <!-- draggable panel -->
+			<div id="draggablePanelList">
+			<!-- https://codepen.io/nonstopnate/pen/RrQwjO -->
+
+
+                  <div class="col-md-4 col-sm-4 col-xs-12">
+                    <!-- panel -->
+                    <div class="x_panel tile fixed_height_390">
+                      <div id="files" class="panel panel-default">
+                      <div class="x_title panel-heading">
+                        <h2 id="files-desc">Uploaded Files<small id="files-desc-small">File list</small></h2>
+
+                        <ul class="nav navbar-right panel_toolbox">
+                          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                          </li>
+                          <li><a class="close-link"><i class="fa fa-close"></i></a>
+                          </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                      </div>
+                      </div>
+
+                      <div class="x_content panel-body">
+
+                        <div class="col-md-12 hidden-small">
+                          <table id="files-table" class="table table-hover" cellpadding="0" width="100%">
+                            <thead>
+                              <tr>
+                                <th>Name</th>
+                                <th>Size</th>
+                                <th>Uploaded</th>
+                              </tr>
+                            </thead>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /x_panel -->
+                    </div>
+
+                  <div class="col-md-4 col-sm-4 col-xs-12">
+                      <!-- panel -->
+                    <div class="x_panel tile fixed_height_390">
+                      <div id="pandas-filter" class="panel panel-default">
+                      <div class="x_title panel-heading">
+                        <h2 id="pandas-filter-desc">Pandas Filter<small id="pandas-filter-desc-small"></small></h2>
+
+                        <ul class="nav navbar-right panel_toolbox">
+                          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                          </li>
+                          <li><a class="close-link"><i class="fa fa-close"></i></a>
+                          </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                      </div>
+                      </div>
+
+                      <div class="x_content panel-body">
+
+                        <div class="col-md-12 hidden-small " id="pandas-filter-div">
+
+
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /x_panel -->
+
+                  </div>
+
+                  <div class="col-md-4 col-sm-4 col-xs-12">
+                      <!-- panel -->
+                    <div class="x_panel tile fixed_height_390">
+                      <div id="pandas" class="panel panel-default">
+                      <div class="x_title panel-heading">
+                        <h2 id="pandas-desc">Pandas Data<small id="pandas-desc-small"></small></h2>
+
+                        <ul class="nav navbar-right panel_toolbox">
+                          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                          </li>
+                          <li><a class="close-link"><i class="fa fa-close"></i></a>
+                          </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                      </div>
+                      </div>
+
+                      <div class="x_content panel-body">
+
+                        <div class="col-md-12 hidden-small " id="pandas-div">
+
+
+
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /x_panel -->
+
+                  </div>
+
+
+                  <div class="col-md-4 col-sm-4 col-xs-12">
+                      <!-- panel -->
+                    <div class="x_panel tile fixed_height_390">
+                      <div id="servers" class="panel panel-default">
+                      <div class="x_title panel-heading">
+                        <h2 id="servers-desc">Devices<small id="servers-desc-small"></small></h2>
+
+                        <ul class="nav navbar-right panel_toolbox">
+                          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                          </li>
+                          <li><a class="close-link"><i class="fa fa-close"></i></a>
+                          </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                      </div>
+                      </div>
+
+                      <div class="x_content panel-body">
+
+                        <div class="col-md-12 hidden-small" id="servers-div">
+
+                          <table id="servers-table" class="table table-hover" cellpadding="0" width="100%">
+                            <thead>
+                              <tr>
+                                <th>Hostname</th>
+                              </tr>
+                            </thead>
+                          </table>
+
+
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /x_panel -->
+
+                  </div>
+
+
+                  <div class="col-md-4 col-sm-4 col-xs-12">
+                      <!-- panel -->
+                    <div class="x_panel tile fixed_height_390">
+                      <div id="graph" class="panel panel-default">
+                      <div class="x_title panel-heading">
+                        <h2 id="graph-desc">Example Graph<small id="graph-desc-small"></small></h2>
+
+                        <ul class="nav navbar-right panel_toolbox">
+                          <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                          </li>
+                          <li><a class="close-link"><i class="fa fa-close"></i></a>
+                          </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                      </div>
+                      </div>
+
+                      <div class="x_content panel-body">
+
+                        <div class="col-md-12 hidden-small" id="graph-div">
+
+
+
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /x_panel -->
+
+                  </div>
+
+
+			</div>
+			<!-- /draggable panel -->
+
+              </div>
+              <!-- /row -->
+			</div>
+
+
+
+        </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+        <footer>
+          <div class="pull-right">
+            ECATS Testbed Control
+          </div>
+          <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+
+      </div>
+      <!-- /main container -->
+    </div>
+    <!-- /container body -->
+
+	{script_includes}
+<script src="static/js/bootstrap-datetimepicker.js"></script>
+
+
+<script>
+{js_script}
+
+</script>
+
+  </body>
+</html>

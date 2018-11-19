@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0">
+    <title id="page-title">Title</title>
+
+	{css_includes}
+
+    <script>var page_name = "{page_name}"</script>
+  	<style>
+  	{css_styles}
+  	</style>
+
+  </head>
+
+
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="index" class="site_title"><i class="fa fa-home"></i> <span id="nav-title"> Grapher</span></a>
+            </div>
+            <div class="clearfix"></div>
+
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+              <ul class="nav side-menu">
+                <li><a href="database"><i class="fa fa-database"></i> Database Maintenance</a></li>
+                <li><a href="graph_upload"><i class="fa fa-upload"></i> File Upload</a></li>
+                <li><a href="textfsm"><i class="fa fa-file-text"></i> TextFSM Scripts</a></li>
+                <li><a href="graph"><i class="fa fa-area-chart"></i> Graph</a></li>
+              </ul>
+             </div>
+             <!-- /menu_selection -->
+
+           </div>
+           <!-- /sidebar menu -->
+          </div>
+        </div>
+
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav class="" role="navigation">
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+            </nav>
+          </div>
+        </div>
+
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              <div class="title_left">
+                <h4 id='main-title'>Loading.. Please wait</h4>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+
+				{html_tables}
+
+              </div>
+            </div>
+            <!-- /row -->
+          </div>
+        </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+        <footer>
+          <div class="pull-right">
+            ECATS Testbed Control
+          </div>
+          <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+
+      </div>
+      <!-- /main container -->
+    </div>
+    <!-- /container body -->
+
+	{script_includes}
+
+
+<script>
+{js_script}
+</script>
+
+  </body>
+</html>

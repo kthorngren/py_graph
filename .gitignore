@@ -1,0 +1,9 @@
+.Python
+.DS_Store
+.idea
+__pycache__
+
+# Project directories
+uploads
+database
+

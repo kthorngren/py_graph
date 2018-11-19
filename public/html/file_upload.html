@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title id = "page-title">Title</title>
+
+{css_includes}
+    
+    <script>var page_name = "File Import"</script>
+  </head>
+
+<style>
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+</style>
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="index" class="site_title"><i class="fa fa-home"></i> <span id="nav-title">Nav Bar</span></a>
+            </div>
+            <div class="clearfix"></div>
+
+            <!-- sidebar menu -->
+            <!-- /sidebar menu -->
+          </div>
+        </div>
+
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav class="" role="navigation">
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+            </nav>
+          </div>
+        </div>                
+                
+     
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              <div class="title_left">
+                <h3 id='main-title'>Main Title</h3>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2 id="table-title">Table Title</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                      </li>
+                      <!--
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
+                        <ul class="dropdown-menu" role="menu">
+                          <li><a href="#">Settings 1</a>
+                          </li>
+                          <li><a href="#">Settings 2</a>
+                          </li>
+                        </ul>
+                      </li>
+                      -->
+                      <li><a class="close-link"><i class="fa fa-close"></i></a>
+                      </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                  </div>
+                  <div class="x_content">
+					<p class="text-muted font-13 m-b-30">The <b>File Import</b> page is used to upload the import CSV file and to initiate inserting or updating device information.  Only one file can be uploaded and processing.  
+					Once complete another file may be uploaded.  The import process is accomplished through a background application that monitors the system for a newly uploaded file.  Once the 
+					file is uploaded, via the <b>Insert</b> or <b>Update</b> buttons, the import app will start processing the file.  This is noted by the <code>Import started</code> log entry.  
+					If this message is not seen then check to make sure the import app is running.</p>
+					<p class="text-muted font-13 m-b-30">The import app will first validate the file by making sure all the required fileds are in the file. Then it will validate the data against the database.  Any errors 
+					in the validation will stop the import from happening.  If there are no errors then the import app will import the data into the database.  Successful imports will be committed 
+					to the database.  Any errors will be logged and not committed to the database.  The rows with errors can be fixed and imported again.</p>
+					<p class="text-muted font-13 m-b-30">The display will show the log of the current import.  If nothing is being imported then the display will show the log of the last import.</P>
+				  </div>
+				  <div class="info col-md-8" >
+					<form id="uploadForm" action="file_upload" method="post" enctype="multipart/form-data" class="form-horizontal">
+    				  <div class="form-group">
+        				<label class="col-md-2 control-label">Select CSV File:</label>
+        				<div class="col-md-3 inputContainer">
+		    			  <input type="file" name="fileToUpload" id="fileToUpload" class="btn btn-default">
+            			  <button id="insert-btn" name="insert-btn" type="submit" class="btn btn-default">Insert</button>
+            			  <button id="update-btn" name="update-btn" type="submit" class="btn btn-default">Update</button>
+           				  <button id="cancel-btn" name="cancel-btn" type="submit" class="btn btn-default">Cancel</button>
+        				</div>
+        			  </div>
+					</form>
+				  </div>
+   				  <div id="import-status">
+			
+   				  </div>
+
+   				  <table id="log" class="table table-striped table-bordered" cellspacing="0" width="100%">
+   					<thead>
+   					  <tr>
+   					    <th>pkid</th>
+   						<th>Time</th>
+   						<th>Level</th>
+   						<th>Message</th>
+   					  </tr>
+   					 </thead>
+   					</table>
+
+                </div>
+                <!-- /x_panel -->
+              </div>
+            </div>
+            <!-- /row -->
+          </div>
+        </div>
+        <!-- /page content -->
+      
+        <!-- footer content -->
+        <footer>
+          <div class="pull-right">
+            ECATS Testbed Control
+          </div>
+          <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+
+      </div>
+      <!-- /main container -->
+    </div>
+    <!-- /container body -->
+
+
+{script_includes}
+
+    <script>
+
+function getNumFilteredRows(id) {
+	//.page.info() returns
+	//{ 
+	//    "page": 1,
+	//    "pages": 6,
+	//    "start": 10,
+	//    "end": 20,
+	//    "length": 10,
+	//    "recordsTotal": 57,
+	//    "recordsDisplay": 57
+	//}
+   var info = $(id).DataTable().page.info();
+   return info.recordsTotal - info.recordsDisplay;
+}
+
+function append_to_log(data) {
+    var data = JSON.parse(data);
+    var new_pkid = $("#log").data("data-pkid") || 0;
+    var t = $('#log').DataTable();
+    var orig_scrollTop = $("#log").data("scrollTop") || 0;
+    if (data.length == 0) {
+        return
+    }
+    var isEndOfScroll = $('.dataTables_scrollBody')[0].offsetHeight + $('.dataTables_scrollBody').scrollTop() + orig_scrollTop >= $('.dataTables_scrollBody')[0].scrollHeight;
+    var blocks = data['data'].map(function (message) {
+        var block = {'pkid':message.pkid, 
+        				'Time': message.Time, 
+        				'Level': message.Level, 
+        				'Message': message.Message};
+        if (message.pkid >= new_pkid) {
+        	new_pkid = message.pkid;
+        }
+        return block;
+    });
+    t.rows.add(blocks).draw(false);
+    var filteredCount = $('#log').data('filtered') || 0;
+    if (isEndOfScroll || (filteredCount != 0 && getNumFilteredRows("#log") == 0)) {  //scroll to bottom if already at bottom or transitioning from filtered to not filterd
+    	$('.dataTables_scrollBody').scrollTop($('.dataTables_scrollBody')[0].scrollHeight);
+    }
+    $('#log').data('filtered', getNumFilteredRows("#log"));
+    $('#log').data('offsetHeight', $('.dataTables_scrollBody')[0].offsetHeight)
+    $("#log").data("data-pkid", new_pkid);
+}
+    
+function do_get_log() {
+    $.ajax({
+        url: "get_import_log",
+        data: {
+            "current_pkid": $("#log").data("data-pkid") || 0
+        }
+    }).done(function (data) {
+        append_to_log(data);
+    }).always(function () {
+        setTimeout(do_get_log, 5000);
+    })
+}
+
+//keep getting last pkid on until initial table load completes
+//todo: if blank log on start, need to find a way to get log and leave the get_scroller loop
+function get_scroller() {
+	var lastTR = log_table.fnGetData($('#log tbody tr:last').get(0))
+	//console.log(lastTR);
+	if (lastTR != null) {
+		//console.log($("#log").data("data-pkid"));
+		if ($("#log").data("data-pkid") != lastTR.pkid) {  //wait for table to load, pkid not incrementing, before running do_get_log
+			$("#log").data("data-pkid", lastTR.pkid);
+		} else {
+			do_get_log();
+			return;
+		}
+	}
+	setTimeout(get_scroller, 1000);
+}
+
+$(document).ready(function() {
+	log_table = $('#log').dataTable( {
+    	ajax:           'get_import_log',
+	    scrollY:        200,
+	    scrollCollapse: true,
+	    paging:			false,
+	    ordering:		false,
+    	columns: [
+	        { data: 'pkid' },
+	        { data: 'Time' },
+	        { data: 'Level' },
+    	    { data: 'Message' }
+    	],
+        columnDefs: [
+            { 	"targets": [0], 
+            	"visible": false,
+            	"searchable": false 
+        	},
+        	{  "width": "12%", "targets": [1] }
+        ],
+        "fnInitComplete": function () {
+            $('.dataTables_scrollBody').scrollTop($('.dataTables_scrollBody')[0].scrollHeight);
+            }
+	} );
+
+    $.ajax({
+        url: "get_active_import",
+        data: { }
+    }).done(function (data) {
+    	var data = JSON.parse(data);
+	    if (data.length == 0) {
+	       	$('#import-status').append(  function() {
+    	   		return $('<div>')
+       				.attr('id', 'none')
+       				.addClass('col-md-10')
+       				.css('font-size', '18px')
+	       			.html('Current status: None')
+    	   	});
+	    }
+       	$('#import-status').append(  function() {
+       		var status = 'None'
+       		if (data.filename) {
+       			status = data.state + ': ' + data.type + ' of devices using file "' + data.filename + '" into testbed: ' + testbed_name()
+       		}
+       		return $('<div>')
+       			.attr('id', data.filename || 'none')
+       			.addClass('col-md-10')
+       			.css('font-size', '18px')
+       			.html('Current status: ' + status)
+       	});
+
+    });
+
+	get_scroller();
+
+} );
+</script>
+
+</body>
+</html>
