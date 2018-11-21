@@ -128,7 +128,7 @@ function saveGraphOptions() {
 	delete temp['hostnames'];
 
 	if ( !graphOptions.save_datetime ) {
-		console.log('clearing date time before saving');
+		//console.log('clearing date time before saving');
 		temp.end_time = '';
 		temp.start_time = '';
 	}
@@ -318,7 +318,6 @@ function buildColumnSelects() {
 
 				//enable the save button
 				$("#save-options").prop("disabled", false);
-
 			} );
 
 		//build DDL options
@@ -415,7 +414,7 @@ function generate_dataframe(autoGraph) {
  	$('#graph-desc-small').html('');
  	$('#graph-div').empty();
  	$('#pandas-desc-small').html('Processing please wait');
-	console.log(filter_data);
+	//console.log(filter_data);
 	web_files = [];
 	for (i = 0; i < file_info.length; i++) {
 		web_files.push(file_info[i].web_path);
@@ -672,9 +671,9 @@ table.on( 'select', function ( e, dt, type, indexes ) {
         //sqlite3 escapes {} wwhen storing in DB
         var temp_options = data[0].graph_options;
         temp_options = temp_options.replace(/\\/g, '');
-        console.log(temp_options);
+        //console.log(temp_options);
         db_options = JSON.parse(temp_options);
-        console.log(db_options);
+        //console.log(db_options);
         graphOptions = Object.assign(graphOptions, db_options);  //combine the default graph options with saved options
 
         //console.log('db_options', db_options);
@@ -733,12 +732,13 @@ $('input.file-opts').on('change', function () {
 
 
 $('input.input-opts').on('change', function () {
-	console.log('input change');
+	//console.log('input change');
 	var id = $(this).prop('id');
 	graphOptions[id] = $(this).val();
 	$("#save-options").prop("disabled", false);
-	console.log(graphOptions);
+	//console.log(graphOptions);
 });
+
 
 
 
@@ -790,16 +790,16 @@ serversTable.on( 'user-select', function ( e, dt, type, indexes ) {
 
     	var row = $(this).closest('tr');
     	var data = table.row($(row)).data();
-		var graphSource = data.source.title;
+  		var graphSource = data.source.title;
 
-		var graphFilter = $(this).hasClass('graph-filter');
+  		var graphFilter = $(this).hasClass('graph-filter');
 
-		if ((graphFilter && graphSource === title) || !graphFilter) {
-	        editor.inline( this, {
-    	        onBlur: 'submit',
-        	} );
-        }
-        table.row($(row)).deselect();  //deselect row to make sure user re-selects to refresh graph options section
+  		if ((graphFilter && graphSource === title) || !graphFilter) {
+  	        editor.inline( this, {
+      	        onBlur: 'submit',
+          	} );
+      }
+      table.row($(row)).deselect();  //deselect row to make sure user re-selects to refresh graph options section
     } );
 
 
