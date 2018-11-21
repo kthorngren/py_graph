@@ -6,6 +6,9 @@ import re
 from pathlib import Path
 from math import log
 
+## SET BACKEND for Matplotlib
+from matplotlib import use as mpl_use
+mpl_use('Agg')
 
 
 from matplotlib.ticker import MultipleLocator, FixedFormatter, FormatStrFormatter, FuncFormatter
@@ -182,7 +185,7 @@ class Graph:
     def get_csv_files(self, filenames):
 
         self.data = []
-        print(filenames)
+        #print(filenames)
 
         for filename in filenames:
             data = pd.read_csv(filename,
@@ -204,6 +207,10 @@ class Graph:
 
 
     def textfsm_parse(self, template):
+
+        template = template.replace('\\\\', '\\')
+        #print('template: \n', repr(template))
+
 
         try:
             self.textfsm_object = textfsm.TextFSM(io.StringIO(template))
@@ -273,7 +280,7 @@ class Graph:
         self.df = pd.DataFrame()
 
     def get_graph(self, **kwargs):
-        #print('get graph kwargs', kwargs)
+        print('get graph kwargs', kwargs)
 
         testing = kwargs.get('testing', False)   #If testing is True then display returned graph
         df_filter = kwargs.get('filter', None)
@@ -449,7 +456,7 @@ class Graph:
                 temp_df = temp_df.reset_index()  #Remove Timestamp from the index anddrop so that hours can be displayed on graph
                 temp_df.drop(temp_df.columns[0], axis=1, inplace=True)
 
-                #print(temp_df)
+                print(temp_df)
 
                 temp_df.plot(ax=self.ax, legend=legend)
 

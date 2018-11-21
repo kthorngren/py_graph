@@ -474,8 +474,8 @@ class Datatables:
                 if type(fields[table]['fields']) == type([]):
                     for field in fields[table]['fields']:  # build SQL select fields list with prefixed table names
                         #print ('table field:', table, field)
-                        fields_list.append('{}.{}'.format(main_table if table == 'main' else table,  # use real field name if 'main'
-                                                          field))
+                        fields_list.append('{}.{}{}'.format(main_table if table == 'main' else table,  # use real field name if 'main'
+                                                          field, ' as "{} {}"'.format(table, field) if table != 'main' else ''))
                     if table != 'main':  #joined table is not multiselect so build a simple join statement
                         #print('joined table is not multiselect so build a simple join statement')
                         sql_join.append(' {join_type} {table} as {object} on ' \
@@ -567,10 +567,16 @@ class Datatables:
                         dt_table = fields[table].get('dt_object', table)  #use table name as dt_object if not defined
                         temp[dt_table] = {}
                     for f in fields[table]['fields']:
+                        #print(table, f)
                         if '{}.{}'.format(main_table, table) in row:
                             #print('{}.{} (complex object) in row with value'.format(table, f), row)
                             temp[dt_table][f] = row['{}.{}'.format(dt_table, f)]
                             del row['{}.{}'.format(table, f)]
+                        #for sqlite3
+                        if '{} {}'.format(table, f) in row:
+                            #print('{} {} (sqlite3 column) in row with value'.format(table, f), row)
+                            temp[dt_table][f] = row['{} {}'.format(table, f)]
+                            del row['{} {}'.format(table, f)]
                         elif f in row:
                             #print('{} (single object) in row with value: "{}"'.format(f, row[f]))
                             #print(f, upload_many)
@@ -591,6 +597,7 @@ class Datatables:
                                 else:
                                     try:
                                         temp[upm_key] = json.loads(row[f])
+                                        # changed from single to double quotes
                                         temp[upm_key] = [{'id': int(i['id'])} for i in temp[upm_key]]
                                     except:
                                         temp[upm_key] =[]
@@ -704,13 +711,13 @@ class Datatables:
                                                      }
         """
         r = result[0].get('sql', '')
-        print(r)
+        #print(r)
         match = re.match(r'.*\s\((.*)\)', r.strip())
 
         if match:
 
             columns = match.group(1).strip().split(',')
-            print(columns)
+            #print(columns)
 
             for col in columns:
 
@@ -719,7 +726,12 @@ class Datatables:
                 column_name = col.pop(0)
                 column_type = col.pop(0).lower().replace('integer', 'int')
                 match = re.match(r'^([a-zA-Z]*)(?:(?:\()*(.*)(?:\)))*', column_type)
-                column_length = int(match.group(2)) if match and match.group(2) and match.group(2).isdigit() else 0
+
+                match = re.match(r'^([a-zA-Z]*)(?:(?:\()*(.*)(?:\)))*', column_type)
+                if match:
+                    column_type = match.group(1)
+                    column_length = int(match.group(2)) if match and match.group(2) and match.group(2).isdigit() else 0
+
 
                 column_reqs = ''
                 column_key = ''
@@ -782,7 +794,7 @@ class Datatables:
             if r == 'row_order':
                 delete_fields.append(r)
                 continue
-            logger.debug('Field {} found in column_requirements: {}'.format(r, r in column_requirements))
+            logger.debug('Field {} found in column_requirements, type: {}, {}'.format(r, column_requirements[r], r in column_requirements))
             if r in column_requirements:
                 #print('checking column reqs', column_requirements[r]['column_key'], r)
                 if record[r] == '' and column_requirements[r]['column_reqs']:
@@ -1159,7 +1171,7 @@ class Datatables:
             return data
 
         elif 'action' in kwargs:
-            print ('manage_{} action kwargs'.format(main_table), kwargs)
+            #print ('manage_{} action kwargs'.format(main_table), kwargs)
             if kwargs['action'] == 'upload':
                 #print(kwargs)
                 upload = {'uploadField': kwargs.get('uploadField', ''),
@@ -1175,8 +1187,13 @@ class Datatables:
                     sql = 'select pkid from uploads where filename = "{}"'.format(result['filename'])
                     
                     pkid = self.db.db_command(sql=sql).one()
-                    print('pkid', pkid)
+                    #print('pkid', pkid)
+                    """
+                    #mysql version
                     sql = 'update uploads set id = {pkid}, timestamp = NOW(), filesize = "{d[filesize]}", system_path = "{d[system_path]}", web_path = "{d[web_path]}" ' \
+                          'where pkid = "{pkid}"'.format(d=result, pkid=pkid['pkid'])
+                    """
+                    sql = 'update uploads set id = {pkid}, timestamp = datetime("now"), filesize = "{d[filesize]}", system_path = "{d[system_path]}", web_path = "{d[web_path]}" ' \
                           'where pkid = "{pkid}"'.format(d=result, pkid=pkid['pkid'])
                     self.db.db_command(sql=sql)
 
@@ -2255,7 +2272,12 @@ class DTSpelunker(Datatables):
                     
                     pkid = self.db.db_command(sql=sql).one()
                     #print('pkid', pkid)
+                    """
+                    #mysql version
                     sql = 'update uploads set id = {pkid}, timestamp = NOW(), filesize = "{d[filesize]}", system_path = "{d[system_path]}", web_path = "{d[web_path]}" ' \
+                          'where pkid = "{pkid}"'.format(d=result, pkid=pkid['pkid'])
+                    """
+                    sql = 'update uploads set id = {pkid}, timestamp = datetime("now"), filesize = "{d[filesize]}", system_path = "{d[system_path]}", web_path = "{d[web_path]}" ' \
                           'where pkid = "{pkid}"'.format(d=result, pkid=pkid['pkid'])
                     self.db.db_command(sql=sql)
 

@@ -275,6 +275,12 @@ class DTEFieldBuilder(DT):
             self.data['type'] = data
         return self
 
+    def with_attr(self, data=''):
+        if data:
+            self.data['attr'] = data
+        return self
+
+
     def with_upload_display(self, image=False, details=False):
         if image:
             self.data['display'] = ''.join([

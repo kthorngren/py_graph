@@ -183,7 +183,7 @@ class Database:
         self.validated = False
         self.validation_error = ''
         self.cursor = None
-        self.results = {}
+        self.result = {}
 
     def connect(self, reconnect=False):
         pass
@@ -328,7 +328,7 @@ class MySql(Database):
                 self.set_status(status='error', error=self.sql_error)
                 logger.error('Unable to ping mysql server: {}'.format(e))
                 #self.mysql.close_cursor()  # make sure to clear cursor and remove lock
-                self.results = {}  # clear out any remaininig SQL responses
+                self.result = {}  # clear out any remaininig SQL responses
                 return self
             try:
                 if 'insert' and 'ignore' in sql.lower():   #suppress "Duplicate entry '<value>' for key 'name_UNIQUE'" warning
@@ -343,14 +343,14 @@ class MySql(Database):
                 logger.warning('sql_execute() error: {}'.format(e))
                 logger.warning('  sql: {}'.format(sql))
                 #self.mysql.close_cursor()  # make sure to clear cursor and remove lock
-                self.results = {}  # clear out any remaininig SQL responses
+                self.result = {}  # clear out any remaininig SQL responses
             else:
                 self.cursor = copy.copy(self.mysql.cursor)
                 logger.debug('Saving cursor object: {}'.format(self.cursor))
                 if uid:
                     logger.debug('UID: {}, fetching all records'.format(self.cursor))
-                    self.results[uid] = self.fetchall()
-                    #print(self.results)
+                    self.result[uid] = self.fetchall()
+                    #print(self.result)
                 self.set_status()
 
                 if 'insert' in sql.lower() or 'update' in sql.lower() or 'delete' in sql.lower():
@@ -393,13 +393,13 @@ class MySql(Database):
 
     def one(self, uid):
 
-        result = self.results.pop(uid, [])
+        result = self.result.pop(uid, [])
         #print (uid)
 
         return result.pop(0) if result else {}
 
     def all(self, uid):
-        result = self.results.pop(uid, {})
+        result = self.result.pop(uid, {})
         #print (uid)
 
         return result if result else []
@@ -688,7 +688,6 @@ class Sqlite(Database):
     from pathlib import Path
 
     def dict_factory(cursor, row):
-        print('dict_factory', row)
         d = {}
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
@@ -716,7 +715,7 @@ class Sqlite(Database):
                 self.cursor = None
             else:
                 self.cursor = self.conn.cursor()
-                #self.cursor.row_factory = Sqlite.dict_factory
+                self.cursor.row_factory = Sqlite.dict_factory
 
     def disconnect(self):
         if self.conn:
@@ -728,36 +727,36 @@ class Sqlite(Database):
 
     def sql_query(self, sql, uid=''):
         logger.debug('sql_query() - {}'.format(sql))
-        logger.debug(self.conn)
         #print(sql)
         get_context = False
         #print('sql_query uid', uid)
-        self.connect()
+        if not self.conn:
+            self.connect()
         with self.conn:
             logger.debug('Using self.conn context: {}'.format(self.conn))
             get_context = True
             self.sql_error = ''
             #logger.debug('Using cursor object: {}'.format(self.cursor))
             try:
-                if 'select' in sql:
-                    self.cursor = self.conn.execute(sql)
-                else:
-                    self.cursor.execute(sql)
+                #print(sql)
+                self.cursor.execute(sql)
             except Exception as e:
                 self.sql_error = str(e)
                 self.set_status(status='error', error=self.sql_error)
                 logger.warning('sql_execute() error: {}'.format(e))
                 logger.warning('  sql: {}'.format(sql))
                 #self.mysql.close_cursor()  # make sure to clear cursor and remove lock
-                self.results = []  # clear out any remaininig SQL responses
+                self.result = []  # clear out any remaininig SQL responses
             else:
+                self.result = self.cursor.fetchall()
+                #print('sql result:', self.result)
                 self.set_status()
 
                 if 'insert' in sql.lower() or 'update' in sql.lower() or 'delete' in sql.lower():
-                    self.conn.commit()
+                    #self.conn.commit()
                     logger.debug('Rows affected: {}'.format(self.row_count()))
                 else:
-                    logger.debug('Rows returned: {}'.format(self.row_count()))
+                    logger.debug('Rows returned: {}'.format(len(self.result)))
                 if self.sql_error:
                     logger.error('Rows returned: {} for error: "{}"sql:\n{}'.format(self.row_count(), self.sql_error, sql))
 
@@ -769,14 +768,12 @@ class Sqlite(Database):
 
     def one(self):
 
-        result = self.results
-        #print (uid)
+        result = self.result
 
         return result.pop(0) if result else {}
 
     def all(self):
-        result = self.results
-        #print (uid)
+        result = self.result
 
         return result if result else []
 
@@ -943,12 +940,8 @@ def test_sqlite():
     db.db_command(sql=sql)
 
 
-    db2 = Sqlite(db='test')
-
-    db2.connect()
-
-    sql = 'select * from names'
-    result = db2.db_command(sql=sql).all()
+    sql = 'select * from names;'
+    result = db.db_command(sql=sql).all()
 
     print(result)
 
@@ -1002,6 +995,7 @@ def reset_graph_table():
   `id` integer DEFAULT 0 ,
   `filename` varchar(45) UNIQUE DEFAULT NULL,
   `timestamp` DATETIME DEFAULT NULL,
+  `filesize` varchar(45) DEFAULT NULL,
   `web_path` varchar(2000) DEFAULT NULL,
   `system_path` varchar(2000) DEFAULT NULL)
   '''
@@ -1034,6 +1028,13 @@ def reset_graph_table():
         sql = sql.replace('\n', '')
         result = db.db_command(sql=sql).row_count()
 
+
+    sql = 'insert into graph_sources (name, title, field, description) values ("Text File", "TextFSM Script", "fk_textfsm", "TestFSM Script")'
+    db.db_command(sql=sql)
+
+    sql = 'insert into graph_sources (name, title, field, description) values ("Perfmon", "TPerfmon Counter", "fk_perfmon_counters", "Perfmon Counter")'
+    db.db_command(sql=sql)
+
 def test_graphs_sql():
 
     sql = 'insert  into uploads (filename) values ("CS_vz0cube1.txt")'
@@ -1048,7 +1049,7 @@ def test_graphs_sql():
     sql = 'select filename from uploads;'
     result = db.db_command(sql=sql).all()
 
-    print(result)
+    print('test result', result)
 
 
 if __name__ == '__main__':
@@ -1058,8 +1059,8 @@ if __name__ == '__main__':
     #db = Database('1.1.1.1', local_host['user'], local_host['password'], 'db_test')
 
 
-    test_sqlite()
-    #reset_graph_table()
+    #test_sqlite()
+    reset_graph_table()
 
     #test_graphs_sql()
 

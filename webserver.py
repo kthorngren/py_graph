@@ -93,7 +93,91 @@ class Testbed:
         self.dt = Datatables(db = 'graphs.sqlite')
         self.graphs = {}
 
+        self.reset_graph_table(drop=False)
 
+
+
+
+
+    def reset_graph_table(self, drop=False):
+        graph_table = '''CREATE TABLE IF NOT EXISTS `graph` (
+      `pkid` integer UNIQUE NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `name` varchar(45) DEFAULT NULL,
+      `description` varchar(100) DEFAULT NULL,
+      `fk_graph_files` integer DEFAULT NULL,
+      `fk_graph_sources` integer DEFAULT NULL,
+      `fk_textfsm` integer DEFAULT NULL,
+      `fk_perfmon_counters` integer DEFAULT NULL,
+      `graph_options` varchar(1000) DEFAULT NULL)
+      '''
+
+        graph_files = '''CREATE TABLE IF NOT EXISTS `graph_files` (
+      `pkid` integer UNIQUE NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `name` varchar(45) DEFAULT NULL,
+      `uploaded_files` varchar(1000) DEFAULT NULL)
+      '''
+
+        graph_sources = '''CREATE TABLE IF NOT EXISTS `graph_sources` (
+      `pkid` integer UNIQUE NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `name` varchar(45) UNIQUE DEFAULT NULL,
+      `title` varchar(45) DEFAULT NULL,
+      `field` varchar(45) DEFAULT NULL,
+      `description` varchar(100) DEFAULT NULL)
+      '''
+
+        perfmon_counters = '''CREATE TABLE IF NOT EXISTS `perfmon_counters` (
+      `pkid` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `name` varchar(200) UNIQUE DEFAULT NULL)
+      '''
+
+        perfmon_templates = '''CREATE TABLE IF NOT EXISTS `perfmon_templates` (
+      `pkid` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `name` varchar(45) UNIQUE DEFAULT NULL,
+      `fk_perfmon_counters` int(11) DEFAULT NULL,
+      `options` varchar(300) DEFAULT NULL)
+      '''
+
+        textfsm = '''CREATE TABLE IF NOT EXISTS `textfsm` (
+      `pkid` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `name` varchar(45) DEFAULT NULL,
+      `script` varchar(1000) DEFAULT NULL)
+      '''
+
+        uploads = '''CREATE TABLE IF NOT EXISTS `uploads` (
+      `pkid` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+      `id` integer DEFAULT 0 ,
+      `filename` varchar(45) UNIQUE DEFAULT NULL,
+      `timestamp` DATETIME DEFAULT NULL,
+      `filesize` varchar(45) DEFAULT NULL,
+      `web_path` varchar(2000) DEFAULT NULL,
+      `system_path` varchar(2000) DEFAULT NULL)
+      '''
+
+        table_list = [graph_table, graph_sources, graph_files, perfmon_counters, perfmon_templates, textfsm, uploads]
+        table_names = ['graph', 'graph_sources', 'graph_files', 'perfmon_counters', 'perfmon_templates', 'textfsm', 'uploads']
+
+        self.db.connect()
+
+        count = 0
+        for table in table_list:
+            t_name  = table_names[count]
+            count += 1
+
+            if drop:
+                sql = 'drop table if exists {}'.format(t_name)
+                result = self.db.db_command(sql=sql).row_count()
+
+
+            sql = escape_sql(table.replace(r'`', ''))
+            sql = sql.replace('\n', '')
+            result = self.db.db_command(sql=sql).row_count()
+
+
+        sql = 'insert or ignore into graph_sources (name, title, field, description) values ("Text File", "TextFSM Script", "fk_textfsm", "TestFSM Script")'
+        self.db.db_command(sql=sql)
+
+        sql = 'insert or ignore into graph_sources (name, title, field, description) values ("Perfmon", "Perfmon Counter", "fk_perfmon_counters", "Perfmon Counter")'
+        self.db.db_command(sql=sql)
 
 
     # todo: updated to be more accrute and added three_digit and bytes parameters
@@ -449,6 +533,7 @@ class Testbed:
             DTEFieldBuilder()
                 .new_field('main.name')
                 .with_label('Name:')
+                .with_attr({ 'autocomplete': "off" })
                 .get_json(),
             DTEFieldBuilder()
                 .new_field('files[].id')
@@ -555,6 +640,7 @@ class Testbed:
             DTEFieldBuilder()
                 .new_field('main.name')
                 .with_label('Name:')
+                .with_attr({ 'autocomplete': "off" })
                 .get_json(),
             DTEFieldBuilder()
                 .new_field('main.script')
@@ -798,6 +884,7 @@ class Testbed:
             DTEFieldBuilder()
                 .new_field('main.name')
                 .with_label('Name:')
+                .with_attr({ 'autocomplete': "off" })
                 .get_json(),
             DTEFieldBuilder()
                 .new_field('main.graph_options')
@@ -807,6 +894,7 @@ class Testbed:
             DTEFieldBuilder()
                 .new_field('main.description')
                 .with_label('Description:')
+                .with_attr({ 'autocomplete': "off" })
                 .get_json(),
             DTEFieldBuilder()
                 .new_field('main.fk_graph_sources')
@@ -894,13 +982,17 @@ class Testbed:
 
         #print(kwargs)
 
-        graph_options = json.dumps(kwargs.get('graph_options', {}))
+        graph_options = kwargs.get('graph_options', {})
 
         pkid = kwargs.get('pkid', 0)
 
         if pkid:
-            sql = 'update graph set graph_options = {} where pkid = "{}"'.format(graph_options, pkid)
-            #print(sql)
+            sql = 'update graph set graph_options = \'{}\'' \
+                  '' \
+                  ' where pkid = "{}"'.format(graph_options, pkid)
+
+
+
             self.db.db_command(sql=sql)
 
         return None
@@ -925,8 +1017,7 @@ class Testbed:
         if fk_graph_files:
 
             sql = 'select uploaded_files from graph_files where pkid = "{}"'.format(fk_graph_files)
-            uid = gen_uid()
-            result = self.db.db_command(sql=sql, uid=uid).one(uid)
+            result = self.db.db_command(sql=sql).one()
 
             if result:
 
@@ -940,15 +1031,15 @@ class Testbed:
                 if graph_files:
                     sql = 'select filename, filesize, timestamp, web_path from uploads where pkid in ({})'.format(','.join(graph_files))
 
-                    uid = gen_uid()
-                    files = self.db.db_command(sql=sql, uid=uid).all(uid)
+                    
+                    files = self.db.db_command(sql=sql).all()
 
 
         #get graph source and Pandas Filter table small description
         if fk_graph_sources:
             sql = 'select description, field from graph_sources where pkid = "{}"'.format(fk_graph_sources)
-            uid = gen_uid()
-            result = self.db.db_command(sql=sql, uid=uid).one(uid)
+            
+            result = self.db.db_command(sql=sql).one()
 
             if result:
                 source_field = result['field']
@@ -963,8 +1054,7 @@ class Testbed:
             else:
                 sql = ''
             if sql:
-                uid = gen_uid()
-                result = self.db.db_command(sql=sql, uid=uid).one(uid)
+                result = self.db.db_command(sql=sql).one()
 
                 if result:
 
@@ -992,7 +1082,7 @@ class Testbed:
     @cherrypy.expose
     def get_dataframe(self, **kwargs):
 
-        print(kwargs)
+        #print('get_dataframe', kwargs)
 
         length = 0
         df_head = ''
@@ -1003,6 +1093,8 @@ class Testbed:
 
         #if filter_type == 'fk_textfsm':
         filter_data = filter_data.replace('<br>', '\n').replace('&nbsp;', ' ')
+
+        #print('filter_data', filter_data)
 
         grapher = self.graphs[graph_id]  #graph object for process ID
         #print(template)

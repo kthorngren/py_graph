@@ -31,10 +31,10 @@ $(function() {
     })
         .on('changeDate', function(e) {
         // `e` here contains the extra attributes
-    	
+
     	var key = $(e.target).attr('id');  //get datetimepicker ID
     	//console.log('changeDate', key);
-    	
+
         var date = $('.datetimepicker').datetimepicker('getDate'); //get updated datetime
         //console.log('New date:', date);
         graphOptions[key] = date;  //saveinto graph options
@@ -91,7 +91,7 @@ function updateFilePaths() {
 function trackGraphOptions() {
 
 	//console.log('update', graphOptions);
-	
+
 	for (i = 0; i < column_selects.length; i++) {
 		data = column_selects[i];
 		select_val = $('#' + data + '_sel').val();
@@ -107,7 +107,7 @@ function trackGraphOptions() {
 		//console.log(data, $('#' + data).prop("checked"));
 		graphOptions[data] = $('#' + data).prop("checked");
 	}
-	
+
 	graphOptions.path = $('#file-path').val();
 	graphOptions.filename = $('#file-template').val();
 
@@ -115,8 +115,8 @@ function trackGraphOptions() {
 	//console.log('tacking hostnames', hostnames);
 	graphOptions.hostnames = hostnames;
 	//console.log('updated', graphOptions);
-	
-	
+
+
 }
 
 //save graphOptions variable to DB
@@ -126,14 +126,15 @@ function saveGraphOptions() {
 	//console.log(pkid, graphOptions);
 	var temp = graphOptions;
 	delete temp['hostnames'];
-	
+
 	if ( !graphOptions.save_datetime ) {
 		console.log('clearing date time before saving');
 		temp.end_time = '';
 		temp.start_time = '';
 	}
-	
+
 	jsonOptions = JSON.stringify(temp);
+  jsonOptions = $.fn.dataTable.util.escapeRegex(jsonOptions);
     $.ajax({
       url: 'save_graph_options',
       data: {'pkid': pkid, 'graph_options': jsonOptions},
@@ -144,7 +145,7 @@ function saveGraphOptions() {
 		//$('.save-range').prop( "checked", false);
 		var data = table.row( {selected: true} ).data();
 		//console.log(data);
-		
+
 		data.main.graph_options = jsonOptions  //update table data with saved graph options
 		//console.log(data);
       }
@@ -162,23 +163,23 @@ function getGraphInfo(data) {
       type: 'post',
       success: function (json) {
         data = JSON.parse(json);
-        
+
         //console.log('graph info data', data);
-        
+
         filesTable.rows.add( data.files ).draw();
-        
+
         //set global variables
         filter_type = data.filter_type
         filter_data = data.filter_data
-        
+
        	//update Pandas Filter table with small desc and filter data
 		$('#pandas-filter-div').append('<code id="pandas-filter-code">' + data.filter_data + '</code>');
 		$('#pandas-filter-desc-small').html(data.filter_desc);
-		
-		
+
+
 		graphId = data.graph;  //track graph process ID
 		file_info = data.files;
-		
+
 		//console.log(files);
 		//$("#get-pandas").prop("disabled", false);
       }
@@ -188,7 +189,7 @@ function getGraphInfo(data) {
 //Update select options to highlight selected and disable options selected in other DDL
 function updateSelectOptions() {
 	var disable = {}
-	
+
 	//build initial object to contain options to disable
 	for (c = 0; c < column_selects.length; c++) {
 		disable[column_selects[c] + '_sel'] = [];
@@ -197,11 +198,11 @@ function updateSelectOptions() {
 	for (c = 0; c < column_selects.length; c++) {
 		graphOptKey = column_selects[c].split('_', 1)[0];
 		graphOpt = graphOptions[graphOptKey]
-		
+
 		//apply selected option
 		$('#' +  column_selects[c] + '_sel').val(graphOpt);
 
-		//build array for each select of disabled options		
+		//build array for each select of disabled options
 		for (d in disable) {
 			//but only for the other selects
 			if (d != graphOptKey + '_col_sel') {
@@ -209,7 +210,7 @@ function updateSelectOptions() {
 			}
 		}
 	}
-	
+
 	//reset all options to enabled
 	$(".column-defs option").prop('disabled', false);
 
@@ -223,7 +224,7 @@ function updateSelectOptions() {
 			}
 		}
 	}
-	
+
 }
 
 //remove pandas dataframe and remove process ID from Python
@@ -277,23 +278,23 @@ function populateDatetime() {
 		$('.datetimepicker').datetimepicker('setEndDate', null);
 
 	}
-	
+
 	//console.log('updating inputs with', start_time, end_time);
 	$('#start_time').datetimepicker('update', start_time);
 	$('#end_time').datetimepicker('update', end_time);
-			
-			
+
+
 	//show and hide is a workaround for the datepicker showing multiple pickers on first showing
 	$('.datetimepicker').datetimepicker('show');
 	$('.datetimepicker').datetimepicker('hide');
-	
+
 }
 
 //build column graph options DDL
-//includes event handlers and marking selected options and disabling 
+//includes event handlers and marking selected options and disabling
 //options selected from other DDL
 function buildColumnSelects() {
-	
+
 	for (c = 0; c < column_selects.length; c++) {
 		var select = $('<select class="column-defs" id="' +  column_selects[c] + '_sel"><option value="">Select Index:</option></select>')
 			.appendTo( $('#' + column_selects[c]).empty() )
@@ -306,35 +307,35 @@ function buildColumnSelects() {
 				//update graphOptions variable
 				trackGraphOptions();
 				//console.log('select_id', select_id);
-				
+
 				//sync up group by checkbox with name of selected option
 				if (select_id === 'selected') {
 					syncGroupBy();
 				}
-				
+
 				//update each of the DDL
-				updateSelectOptions();				
+				updateSelectOptions();
 
 				//enable the save button
 				$("#save-options").prop("disabled", false);
-				
+
 			} );
 
 		//build DDL options
 		for (i = 0; i < df_columns.length; i++) {
 			col_name = df_columns[i]
-			
+
 			if (col_name != index_column) {
 				select.append( '<option value="'+ col_name +'">'+ col_name +'</option>' );
 			}
 		}
-		
+
 	}
-	
+
 	//update initial DDL with selected option and disabled options
 	updateSelectOptions();
-	
-	
+
+
 }
 
 //update checkboxes based on current graphOptions variable - likely from DB
@@ -359,7 +360,7 @@ function syncGroupBy () {
 	//get device column selection
 	var device_column = $('#selected_col_sel').val()
 	//console.log('sync', $('#selected_col_sel').val());
-	
+
 	if (device_column === '') {
 		//if null and row is selected then indicate no device selected
 		if (table.row( { selected: true } ).any()) {
@@ -368,17 +369,17 @@ function syncGroupBy () {
 		//otherwise just display group by if no row selection
 		} else {
 			groupBy = 'Group By';
-			cb_disabled = false;  //display default option 
+			cb_disabled = false;  //display default option
 			$("#group_by").prop("disabled", true); //disable checkbox if no row selection
 		}
-		  
+
 	} else {
 		//display the device column name
 		groupBy = 'Group By ' + device_column;
 		cb_disabled = false;
 	}
-	
-	
+
+
 	if (cb_disabled) {
 		//uncheck if device option not selected
 		$('#group_by').attr('checked', false);
@@ -386,10 +387,10 @@ function syncGroupBy () {
 		//otherwise show configured checkbox status
 		$('#group_by').attr('checked', graphOptions['group_by']);
 	}
-	
+
 	//save the checkbox status
 	graphOptions['group_by'] = $('#group_by').prop('checked');
-	
+
 	//update the label span display
 	$('#group_by_label span').text(groupBy);
 }
@@ -399,7 +400,7 @@ $('#save-options').click(function(){
 	saveGraphOptions();
 	//$('#save-options').addClass('active');
 	//$('#save-options').attr('aria-pressed', 'false');
-	
+
 	$("#save-options").prop("disabled", true);
 } );
 
@@ -414,7 +415,7 @@ function generate_dataframe(autoGraph) {
  	$('#graph-desc-small').html('');
  	$('#graph-div').empty();
  	$('#pandas-desc-small').html('Processing please wait');
-	//console.log(graphId);
+	console.log(filter_data);
 	web_files = [];
 	for (i = 0; i < file_info.length; i++) {
 		web_files.push(file_info[i].web_path);
@@ -455,16 +456,16 @@ function generate_dataframe(autoGraph) {
 			graphOptions.pandas_start_time = data.start_time;
 			graphOptions.pandas_end_time = data.end_time;
 			populateDatetime();
-        	
+
         	if (autoGraph) {
-        	
+
         		disableGraphOptions();
 
 				$('#pandas-div').append('<code id="pandas-code">' + data.df_head + '</code>');
 				$('#pandas-desc-small').html('Took ' + ((Date.now() - startTime) / 1000) + ' seconds to process<br>Showing top and bottom 5 rows of ' + data.df_length + ' rows');
-				
+
 				generate_graphs(true);
-        	
+
         	} else {
 				$('#pandas-div').append('<code id="pandas-code">' + data.df_head + '</code>');
 				$('#pandas-desc-small').html('Took ' + ((Date.now() - startTime) / 1000) + ' seconds to process<br>Showing top and bottom 5 rows of ' + data.df_length + ' rows');
@@ -472,7 +473,7 @@ function generate_dataframe(autoGraph) {
 				enableGraphButton();
 				enableGraphOptions();
 			}
-			
+
 
 		}
 		$("#get-pandas").prop("disabled", true);
@@ -495,7 +496,7 @@ function generate_graphs(autoGraph) {
  	$("#auto-graph").prop("disabled", true);
 
  	$('#graph-desc-small').html('Processing please wait');
- 	
+
  	trackGraphOptions();
  	graphOptions.id = graphId;
  	//console.log('Getting graph using: ', graphOptions);
@@ -513,15 +514,15 @@ function generate_graphs(autoGraph) {
       },
       success: function (data) {
         //data = JSON.parse(json);
-        
+
 		//console.log(data);
 		//$('#pandas-div').append('<code id="pandas-code">' + data.df_head + '</code>');
-		
+
 		$('#graph-div').empty().append(data);
 
-		
+
 		$('#graph-desc-small').html('Took ' + ((Date.now() - startTime) / 1000) + ' seconds');
-		
+
 		enableGraphButton();
 		enableGraphOptions();
 
@@ -532,7 +533,7 @@ function generate_graphs(autoGraph) {
 
 $('#get-pandas').click(function(){
 
-	generate_dataframe(false);    
+	generate_dataframe(false);
 
 } );
 
@@ -540,9 +541,9 @@ $('#get-pandas').click(function(){
 $('#auto-graph').click(function(){
 
 	$("#get-pandas").prop("disabled", true);
-	generate_dataframe(true);    
+	generate_dataframe(true);
 
-    
+
 } );
 
 
@@ -579,7 +580,7 @@ function disableGraphOptions() {
 function enableGraphButton() {
 	var count = serversTable.rows( { selected: true } ).count();
 	//console.log('enableGraphButton() count', count);
-	
+
 	if (count > 0) {
 		$("#gen-graph").prop("disabled", false);
 	} else {
@@ -632,7 +633,7 @@ function clearPanels () {
     	filesTable.clear().draw();
     	serversTable.clear().draw();
  		clearGraph();
- 		
+
  		df_columns = [];
  		resetGraphOptions();
  		buildColumnSelects();
@@ -642,7 +643,7 @@ function clearPanels () {
  		$('#pandas-desc-small').html('');
 		$("#get-pandas").prop("disabled", true);
 		$("#save-options").prop("disabled", true);
-		
+
 		$('#graph-div').empty()
 		$('#graph-desc-small').html('Complete');
 		$("#gen-graph").prop("disabled", true);
@@ -650,7 +651,7 @@ function clearPanels () {
 
 		$('.column-defs').attr('disabled', true);
 		$('.graph-cb').prop("disabled", true);
-		
+
 		$('.select-all-devices').prop("disabled", true);
 		$('.select-all-devices').prop( "checked", false );
 }
@@ -665,32 +666,37 @@ table.on( 'select', function ( e, dt, type, indexes ) {
         $("#get-pandas").prop("disabled", false);  //enable generate pandas button
         $("#auto-graph").prop("disabled", false);  //enable auto generate graphs button
         getGraphInfo(data[0]);  //get the graph options for selected graph
-        
+
         //console.log('data[0].graph_options', data[0].graph_options);
-        db_options = JSON.parse(data[0].graph_options);
+
+        //sqlite3 escapes {} wwhen storing in DB
+        var temp_options = data[0].graph_options;
+        temp_options = temp_options.replace(/\\/g, '');
+        console.log(temp_options);
+        db_options = JSON.parse(temp_options);
         console.log(db_options);
         graphOptions = Object.assign(graphOptions, db_options);  //combine the default graph options with saved options
-        
+
         //console.log('db_options', db_options);
         //console.log('graphOptions', graphOptions);
-        
+
         df_columns = [];
 		for (c = 0; c < column_selects.length; c++) {
 			opt = graphOptions[column_selects[c].split('_', 1)[0]]
-			
+
 			if (opt) {
 				df_columns.push(opt)  //set selected option to the saved option for graph columns (index, device, data)
 			}
 		}
-        
-        
+
+
         buildColumnSelects();  //Build the options and disable selected
         buildCheckboxes();
         populateTextInputs();
         updateFilePaths();
         syncGroupBy();			//sync Group By check box and label display with saved options
         populateDatetime();
-        
+
 		$('.column-defs').attr('disabled', true);
 		$('.graph-cb').prop("disabled", true);
 
@@ -704,7 +710,7 @@ table.on( 'deselect', function ( e, dt, type, indexes ) {
     	clearPanels();
     	syncGroupBy();
     	resetGraphOptions();
- 		
+
     }
 } );
 
@@ -713,9 +719,9 @@ table.on( 'deselect', function ( e, dt, type, indexes ) {
 //    .on( 'init.dt', function () {
 //        table.row(6).select();
 
-        
+
 //    } );
-    
+
 
 $('input.graph-cb').on('change', function () {
 	$("#save-options").prop("disabled", false);
@@ -785,9 +791,9 @@ serversTable.on( 'user-select', function ( e, dt, type, indexes ) {
     	var row = $(this).closest('tr');
     	var data = table.row($(row)).data();
 		var graphSource = data.source.title;
-		
+
 		var graphFilter = $(this).hasClass('graph-filter');
-		
+
 		if ((graphFilter && graphSource === title) || !graphFilter) {
 	        editor.inline( this, {
     	        onBlur: 'submit',
@@ -812,7 +818,7 @@ serversTable.on( 'user-select', function ( e, dt, type, indexes ) {
                             false
                         )
                         .val();
- 
+
                     // Create a new entry (discarding the previous edit) and
                     // set the values from the read values
                     editor
@@ -822,10 +828,10 @@ serversTable.on( 'user-select', function ( e, dt, type, indexes ) {
                         } )
                         .set( values );
                 }
-            },        
+            },
         { extend: "remove", editor: editor }
     ] );
- 
+
     table.buttons().container()
         .appendTo( $('.col-sm-6:eq(0)', table.table().container() ) );
 
@@ -840,7 +846,7 @@ editor.dependent( 'main.fk_graph_sources', function ( val, data, callback ) {
     } else if (val == '2') {
     	var depend = { hide: 'main.fk_textfsm', show: 'main.fk_perfmon_counters'};
     	return depend;
-    
+
     } else {
     	return { hide: ['main.fk_perfmon_counters', 'main.fk_textfsm']}
     }
@@ -881,11 +887,9 @@ editor.on( 'preSubmit', function (e, action) {
 } );
 
 
-//Build initial default page display        
+//Build initial default page display
 resetGraphOptions();
 buildColumnSelects();
 buildCheckboxes();
 populateTextInputs();
 updateFilePaths();
-
-
